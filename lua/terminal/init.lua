@@ -142,7 +142,7 @@ function M.open(cmd, opts)
 		end
 	end
 
-	local terminal = Win(opts.win)
+	local terminal = Win(opts.win) --[[@as terminal]]
 	local tid = M.tid(cmd, opts)
 	terminals[tid] = terminal
 
@@ -237,6 +237,7 @@ end
 --- The terminal id is based on the `cmd`, `cwd`, `env` and `vim.v.count1` options.
 ---@param cmd? string | string[]
 ---@param opts? terminal.Opts
+---@return terminal
 function M.toggle(cmd, opts)
 	local terminal, created = M.get(cmd, opts)
 	return created and terminal or assert(terminal):toggle()
@@ -246,6 +247,7 @@ end
 --- The terminal id is based on the `cmd`, `cwd`, `env` and `vim.v.count1` options.
 ---@param cmd? string | string[]
 ---@param opts? terminal.Opts
+---@return terminal?, boolean?
 function M.focus(cmd, opts)
 	local terminal, created = M.get(cmd, opts)
 	if terminal and not created and vim.api.nvim_get_current_buf() == terminal.buf then
