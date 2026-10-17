@@ -1,8 +1,16 @@
 local Win = require("win")
 
----@class terminal: win
+---@class terminal
+---@field buf? integer
 ---@field cmd? string | string[]
 ---@field opts terminal.Opts
+---@field hide fun(self: terminal): terminal
+---@field show fun(self: terminal): terminal
+---@field focus fun(self: terminal)
+---@field toggle fun(self: terminal): terminal
+---@field close fun(self: terminal, opts?: table)
+---@field on fun(self: terminal, event: string|string[], callback: function, opts?: table)
+---@field buf_valid fun(self: terminal): boolean
 ---@overload fun(cmd?: string|string[], opts?: terminal.Opts): terminal
 local M = setmetatable({}, {
 	__call = function(t, ...)
@@ -22,7 +30,7 @@ function M.setup(opts)
 end
 
 ---@class terminal.Config
----@field win? win.Config|{}
+---@field win? table<string, any>
 ---@field shell? string|string[] The shell to use. Defaults to `vim.o.shell`
 ---@field override? fun(cmd?: string|string[], opts?: terminal.Opts) Use this to use a different terminal implementation
 ---@type terminal.Opts
