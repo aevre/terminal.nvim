@@ -8,7 +8,6 @@ A standalone terminal manager for Neovim. It creates reusable floating or split 
 - [Usage](#usage)
 - [Configuration](#configuration)
 - [API](#api)
-- [Migration](#migration)
 
 ## Requirements
 
@@ -114,17 +113,3 @@ terminal.colorize()
 - `colorize()` applies terminal color output to the current buffer when used by a command pipeline.
 
 Each terminal object is a `win.nvim` window object with terminal-specific `cmd` and `opts` fields.
-
-## Migration
-
-The former configuration module `Builtin.terminal` is now a compatibility forwarder to `require("terminal")`. New integrations should use the standalone module directly:
-
-```lua
-require("terminal").toggle()
-```
-
-The dependency chain is intentionally small:
-
-```text
-terminal.nvim -> win.nvim
-```

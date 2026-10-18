@@ -108,17 +108,3 @@ terminal.colorize()
 - `colorize()` 为当前 buffer 应用终端彩色输出，适用于命令管道场景。
 
 每个终端对象都是 `win.nvim` 窗口对象，并额外包含 terminal 的 `cmd` 和 `opts` 字段。
-
-## 迁移
-
-原来的 `Builtin.terminal` 现在只是 `require("terminal")` 的兼容转发。新的集成应直接使用独立模块：
-
-```lua
-require("terminal").toggle()
-```
-
-依赖链保持最小：
-
-```text
-terminal.nvim -> win.nvim
-```
