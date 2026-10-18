@@ -30,7 +30,7 @@ local defaults = {
 	win = {
 		style = "terminal",
 		wo = {
-			winhighlight = "FloatBorder:AevreWinNormal",
+			winhighlight = "Normal:NormalFloat,NormalNC:NormalFloat,FloatBorder:FloatBorder,FloatTitle:FloatTitle",
 		},
 	},
 }
