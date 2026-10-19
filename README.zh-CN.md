@@ -46,6 +46,9 @@ terminal.open(nil, {
 
 -- 聚焦已有终端，不存在时创建。
 terminal.focus("lazygit")
+
+-- 选择一个已打开的终端。
+terminal.select()
 ```
 
 命令可以是字符串或参数数组。插件会根据命令、工作目录、环境变量和 count 复用已有终端。
@@ -91,6 +94,7 @@ local terminal = require("terminal")
 terminal.open(cmd?, opts?)
 terminal.get(cmd?, opts?)
 terminal.list()
+terminal.select()
 terminal.toggle(cmd?, opts?)
 terminal.focus(cmd?, opts?)
 terminal.tid(cmd?, opts?)
@@ -101,6 +105,7 @@ terminal.colorize()
 - `open()` 始终创建新的终端窗口。
 - `get()` 返回匹配的终端对象以及是否新建。
 - `list()` 返回当前仍有效的终端对象。
+- `select()` 使用 `vim.ui.select()` 选择终端，并按其原窗口样式聚焦。
 - `toggle()` 隐藏已有终端，否则创建终端。
 - `focus()` 聚焦终端；若已经聚焦则隐藏，否则创建终端。
 - `tid()` 计算终端复用标识。

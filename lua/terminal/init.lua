@@ -228,9 +228,42 @@ end
 
 ---@return terminal[]
 function M.list()
-	return vim.tbl_filter(function(t)
-		return t:buf_valid() or false
-	end, terminals)
+	local ret = {}
+	for _, terminal in pairs(terminals) do
+		if terminal:buf_valid() then
+			ret[#ret + 1] = terminal
+		end
+	end
+	table.sort(ret, function(a, b)
+		return a.buf < b.buf
+	end)
+	return ret
+end
+
+--- Select and focus an open terminal.
+function M.select()
+	local items = {}
+	for i, terminal in ipairs(M.list()) do
+		local title = vim.b[terminal.buf].term_title
+		local cmd = terminal.cmd or vim.o.shell
+		items[i] = {
+			index = i,
+			terminal = terminal,
+			label = title and title ~= "" and not title:find("^term://") and title
+				or (type(cmd) == "table" and table.concat(cmd, " ") or cmd),
+		}
+	end
+
+	vim.ui.select(items, {
+		prompt = "Terminals",
+		format_item = function(item)
+			return item.index .. ". " .. item.label
+		end,
+	}, function(item)
+		if item then
+			item.terminal:show():focus()
+		end
+	end)
 end
 
 --- Toggle a terminal window.

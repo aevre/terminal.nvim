@@ -51,6 +51,9 @@ terminal.open(nil, {
 
 -- Focus an existing terminal, or create it when necessary.
 terminal.focus("lazygit")
+
+-- Select an open terminal.
+terminal.select()
 ```
 
 The command can be a string or an argument list. Terminals are reused according to command, working directory, environment, and count.
@@ -96,6 +99,7 @@ local terminal = require("terminal")
 terminal.open(cmd?, opts?)
 terminal.get(cmd?, opts?)
 terminal.list()
+terminal.select()
 terminal.toggle(cmd?, opts?)
 terminal.focus(cmd?, opts?)
 terminal.tid(cmd?, opts?)
@@ -106,6 +110,7 @@ terminal.colorize()
 - `open()` always creates a terminal window.
 - `get()` returns the matching terminal and whether it was created.
 - `list()` returns currently valid terminal objects.
+- `select()` uses `vim.ui.select()` to focus an open terminal in its original window style.
 - `toggle()` hides an existing terminal or opens it.
 - `focus()` focuses an existing terminal, hides it when already focused, or opens it.
 - `tid()` calculates the reuse identifier.
