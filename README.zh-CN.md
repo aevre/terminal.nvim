@@ -51,7 +51,7 @@ terminal.focus("lazygit")
 terminal.select()
 ```
 
-命令可以是字符串或参数数组。插件会根据命令、工作目录、环境变量和 count 复用已有终端。
+命令可以是字符串或参数数组。插件会根据命令、工作目录、环境变量和 count 复用已有终端。复用终端时传入不同的 `win.position`，会将原终端 buffer 和进程切换到新布局。
 
 ## 配置
 

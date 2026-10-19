@@ -56,7 +56,7 @@ terminal.focus("lazygit")
 terminal.select()
 ```
 
-The command can be a string or an argument list. Terminals are reused according to command, working directory, environment, and count.
+The command can be a string or an argument list. Terminals are reused according to command, working directory, environment, and count. Passing a different `win.position` when reusing a terminal moves the existing terminal buffer and process to that layout.
 
 ## Configuration
 

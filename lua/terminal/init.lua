@@ -108,6 +108,7 @@ function M.open(cmd, opts)
 		position = cmd and "float" or "bottom",
 	}, opts.win, { show = false })
 	opts = vim.deepcopy(opts)
+	local auto_winbar = opts.win.wo.winbar == nil
 	---@diagnostic disable-next-line: need-check-nil
 	opts.win.wo.winbar = opts.win.wo.winbar
 		or (opts.win.position == "float" and "" or (id .. ": %{get(b:, 'term_title', '')}"))
@@ -143,6 +144,7 @@ function M.open(cmd, opts)
 	end
 
 	local terminal = Win(opts.win) --[[@as terminal]]
+	terminal.meta.terminal_auto_winbar = auto_winbar
 	local tid = M.tid(cmd, opts)
 	terminals[tid] = terminal
 
@@ -266,6 +268,28 @@ function M.select()
 	end)
 end
 
+local function update_win(terminal, opts)
+	if not opts or not opts.win then
+		return false
+	end
+
+	local position = terminal.opts.position
+	local target = opts.win.position or position
+	terminal.opts = Win.resolve(terminal.opts, target == "float" and "float" or "split", vim.deepcopy(opts.win))
+	local changed = position ~= terminal.opts.position
+	if changed then
+		local vertical = terminal.opts.position == "left" or terminal.opts.position == "right"
+		terminal.opts.wo.winfixheight = not vertical
+		terminal.opts.wo.winfixwidth = vertical
+		if terminal.meta.terminal_auto_winbar then
+			local id = vim.b[terminal.buf].core_terminal.id
+			terminal.opts.wo.winbar = terminal.opts.position == "float" and ""
+				or (id .. ": %{get(b:, 'term_title', '')}")
+		end
+	end
+	return changed
+end
+
 --- Toggle a terminal window.
 --- The terminal id is based on the `cmd`, `cwd`, `env` and `vim.v.count1` options.
 ---@param cmd? string | string[]
@@ -273,7 +297,15 @@ end
 ---@return terminal
 function M.toggle(cmd, opts)
 	local terminal, created = M.get(cmd, opts)
-	return created and terminal or assert(terminal):toggle()
+	if created then
+		return terminal
+	end
+
+	terminal = assert(terminal)
+	if update_win(terminal, opts) and terminal:valid() then
+		terminal:hide()
+	end
+	return terminal:toggle()
 end
 
 --- Focus a terminal window. If already focused, hide it.
@@ -283,7 +315,10 @@ end
 ---@return terminal?, boolean?
 function M.focus(cmd, opts)
 	local terminal, created = M.get(cmd, opts)
-	if terminal and not created and vim.api.nvim_get_current_buf() == terminal.buf then
+	local changed = terminal and not created and update_win(terminal, opts)
+	if terminal and changed and terminal:valid() then
+		terminal:hide()
+	elseif terminal and not created and vim.api.nvim_get_current_buf() == terminal.buf then
 		terminal:hide()
 		return terminal, created
 	end
