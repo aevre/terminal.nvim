@@ -118,3 +118,7 @@ terminal.colorize()
 - `colorize()` applies terminal color output to the current buffer when used by a command pipeline.
 
 Each terminal object is a `win.nvim` window object with terminal-specific `cmd` and `opts` fields.
+
+## Development
+
+Run `make check` from the repository root. The guarded `plugin/terminal.lua` entrypoint only applies defaults; terminal behavior stays under `lua/terminal/`. Keep `setup()` safe when a plugin manager calls it again with user options.

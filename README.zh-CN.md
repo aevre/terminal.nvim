@@ -113,3 +113,7 @@ terminal.colorize()
 - `colorize()` 为当前 buffer 应用终端彩色输出，适用于命令管道场景。
 
 每个终端对象都是 `win.nvim` 窗口对象，并额外包含 terminal 的 `cmd` 和 `opts` 字段。
+
+## 开发
+
+在仓库根目录运行 `make check`。带 guard 的 `plugin/terminal.lua` 入口只应用默认配置，终端行为保留在 `lua/terminal/`。插件管理器随后以用户选项再次调用 `setup()` 时必须保持安全。
