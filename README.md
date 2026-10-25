@@ -1,6 +1,6 @@
 # terminal.nvim
 
-A standalone terminal manager for Neovim. It creates reusable floating or split terminal windows and is built on [win.nvim](https://codeberg.org/aevre/win.nvim).
+A standalone terminal manager for Neovim. It creates reusable floating or split terminal windows and is built on [win.nvim](https://github.com/aevre/win.nvim).
 
 [简体中文](README.zh-CN.md)
 
@@ -12,20 +12,19 @@ A standalone terminal manager for Neovim. It creates reusable floating or split 
 ## Requirements
 
 - Neovim 0.10 or newer.
-- [win.nvim](https://codeberg.org/aevre/win.nvim).
+- [win.nvim](https://github.com/aevre/win.nvim).
 
 ## Installation
 
-The canonical repository is hosted on Codeberg:
-<https://codeberg.org/aevre/terminal.nvim>.
+Available on Codeberg: <https://codeberg.org/aevre/terminal.nvim> and GitHub: <https://github.com/aevre/terminal.nvim>.
 
 With lazy.nvim:
 
 ```lua
 {
-  "https://codeberg.org/aevre/terminal.nvim",
+  "https://github.com/aevre/terminal.nvim",
   dependencies = {
-    "https://codeberg.org/aevre/win.nvim",
+    "https://github.com/aevre/win.nvim",
   },
   opts = {},
 }

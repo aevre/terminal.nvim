@@ -1,26 +1,25 @@
 # terminal.nvim
 
-一个独立的 Neovim 终端管理插件。它基于 [win.nvim](https://codeberg.org/aevre/win.nvim)，创建可复用的浮动终端或分屏终端窗口。
+一个独立的 Neovim 终端管理插件。它基于 [win.nvim](https://github.com/aevre/win.nvim)，创建可复用的浮动终端或分屏终端窗口。
 
 [English](README.md)
 
 ## 环境要求
 
 - Neovim 0.10 或更新版本。
-- [win.nvim](https://codeberg.org/aevre/win.nvim)。
+- [win.nvim](https://github.com/aevre/win.nvim)。
 
 ## 安装
 
-项目托管于 Codeberg：
-<https://codeberg.org/aevre/terminal.nvim>。
+同时托管于 Codeberg：<https://codeberg.org/aevre/terminal.nvim> 和 GitHub：<https://github.com/aevre/terminal.nvim>。
 
 使用 lazy.nvim：
 
 ```lua
 {
-  "https://codeberg.org/aevre/terminal.nvim",
+  "https://github.com/aevre/terminal.nvim",
   dependencies = {
-    "https://codeberg.org/aevre/win.nvim",
+    "https://github.com/aevre/win.nvim",
   },
   opts = {},
 }
