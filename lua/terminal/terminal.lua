@@ -118,7 +118,7 @@ function M.update_win(terminal, opts)
 
 	local position = terminal.opts.position
 	local target = opts.win.position or position
-	local win_opts = vim.deepcopy(opts.win)
+	local win_opts = vim.deepcopy(opts.win) --[[@as win.Config]]
 	if (target == "left" or target == "right") and win_opts.width == nil then
 		win_opts.width = 0.3
 	end
