@@ -72,7 +72,7 @@ require("terminal").setup({
 
 | 选项 | 说明 |
 | --- | --- |
-| `win` | `win.nvim` 窗口配置，默认使用 `terminal` 样式。 |
+| `win` | `win.nvim` 窗口配置，默认使用 `terminal` 样式，`width = 0.3`（编辑器宽度的 30%，也适用于浮窗）。 |
 | `shell` | 未指定命令时使用的 shell，默认为 `vim.o.shell`。 |
 | `cwd` | 进程工作目录。 |
 | `env` | 传给进程的环境变量。 |
@@ -83,7 +83,7 @@ require("terminal").setup({
 | `interactive` | 同时启用上述三个交互选项，默认为 `true`。 |
 | `override` | 替换内置终端实现的函数。 |
 
-终端窗口使用由 `win.nvim` 注册的 `terminal` 样式，包含终端 filetype、分屏堆叠、双击 Escape 和 `q` 隐藏等行为。
+终端窗口使用由 `win.nvim` 注册的 `terminal` 样式，包含终端 filetype、分屏堆叠、双击 Escape 和 `q` 隐藏等行为。浮动和分屏终端默认均隐藏顶部 winbar；可通过 `win.wo.winbar` 设置自定义标题。
 
 ## API
 

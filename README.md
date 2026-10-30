@@ -77,7 +77,7 @@ Important options:
 
 | Option | Description |
 | --- | --- |
-| `win` | A `win.nvim` window configuration. The default uses the `terminal` style. |
+| `win` | A `win.nvim` window configuration. The default uses the `terminal` style with `width = 0.3` (30% of the editor width, including floats). |
 | `shell` | Shell command used when no command is supplied. Defaults to `vim.o.shell`. |
 | `cwd` | Working directory for the process. |
 | `env` | Environment variables passed to the process. |
@@ -88,7 +88,7 @@ Important options:
 | `interactive` | Shortcut enabling `start_insert`, `auto_insert`, and `auto_close`; defaults to `true`. |
 | `override` | Function that replaces the built-in terminal implementation. |
 
-Terminal windows use the `terminal` style registered with `win.nvim`. The style includes terminal filetype, stacked splits, a double-escape mapping, and `q` to hide.
+Terminal windows use the `terminal` style registered with `win.nvim`. The style includes terminal filetype, stacked splits, a double-escape mapping, and `q` to hide. The top winbar is hidden by default in both floating and split terminals; set `win.wo.winbar` to display a custom title.
 
 ## API
 

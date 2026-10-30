@@ -29,6 +29,7 @@ end
 local defaults = {
 	win = {
 		style = "terminal",
+		width = 0.3,
 		wo = {
 			winhighlight = "Normal:NormalFloat,NormalNC:NormalFloat,FloatBorder:FloatBorder,FloatTitle:FloatTitle",
 		},
@@ -48,7 +49,9 @@ Win.style.add("terminal", {
 	bo = {
 		filetype = "core_terminal",
 	},
-	wo = {},
+	wo = {
+		winbar = "",
+	},
 	stack = true, -- when enabled, multiple split windows with the same position will be stacked together (useful for terminals)
 	keys = {
 		q = "hide",
@@ -108,10 +111,6 @@ function M.open(cmd, opts)
 		position = cmd and "float" or "bottom",
 	}, opts.win, { show = false })
 	opts = vim.deepcopy(opts)
-	local auto_winbar = opts.win.wo.winbar == nil
-	---@diagnostic disable-next-line: need-check-nil
-	opts.win.wo.winbar = opts.win.wo.winbar
-		or (opts.win.position == "float" and "" or (id .. ": %{get(b:, 'term_title', '')}"))
 
 	if opts.override then
 		return opts.override(cmd, opts)
@@ -144,7 +143,6 @@ function M.open(cmd, opts)
 	end
 
 	local terminal = Win(opts.win) --[[@as terminal]]
-	terminal.meta.terminal_auto_winbar = auto_winbar
 	local tid = M.tid(cmd, opts)
 	terminals[tid] = terminal
 
@@ -281,11 +279,6 @@ local function update_win(terminal, opts)
 		local vertical = terminal.opts.position == "left" or terminal.opts.position == "right"
 		terminal.opts.wo.winfixheight = not vertical
 		terminal.opts.wo.winfixwidth = vertical
-		if terminal.meta.terminal_auto_winbar then
-			local id = vim.b[terminal.buf].core_terminal.id
-			terminal.opts.wo.winbar = terminal.opts.position == "float" and ""
-				or (id .. ": %{get(b:, 'term_title', '')}")
-		end
 	end
 	return changed
 end
