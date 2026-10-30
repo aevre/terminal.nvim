@@ -77,7 +77,7 @@ Important options:
 
 | Option | Description |
 | --- | --- |
-| `win` | A `win.nvim` window configuration. The default uses the `terminal` style with `width = 0.3` (30% of the editor width, including floats). |
+| `win` | A `win.nvim` window configuration. Left and right splits default to `width = 0.3` (30% of the editor width); floating and top/bottom terminals use the `win.nvim` defaults. |
 | `shell` | Shell command used when no command is supplied. Defaults to `vim.o.shell`. |
 | `cwd` | Working directory for the process. |
 | `env` | Environment variables passed to the process. |

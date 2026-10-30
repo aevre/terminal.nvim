@@ -36,6 +36,11 @@ local ok, err = pcall(function()
 	for count, position in ipairs({ "bottom", "top", "left", "right", "float" }) do
 		local terminal = open({ count = count, interactive = false, win = { position = position } })
 		check(terminal, "")
+		if position == "float" then
+			assert(terminal.opts.width == 0.9, "float should use the win.nvim default width")
+		elseif position == "left" or position == "right" then
+			assert(terminal.opts.width == 0.3, "side splits should use the terminal width default")
+		end
 		local buf = terminal.buf
 		terminal:hide()
 		terminal:show()

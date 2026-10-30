@@ -17,9 +17,17 @@ end
 ---@return terminal?
 function M.open(cmd, opts)
 	local id = opts.count or vim.v.count1
-	opts.win = Win.resolve("terminal", {
-		position = cmd and "float" or "bottom",
-	}, opts.win, { show = false })
+	local position = cmd and "float" or "bottom"
+	if opts.win and opts.win.position then
+		position = opts.win.position
+	end
+	local win_opts = {
+		position = position,
+	}
+	if (position == "left" or position == "right") and (not opts.win or opts.win.width == nil) then
+		win_opts.width = 0.3
+	end
+	opts.win = Win.resolve("terminal", win_opts, opts.win, { show = false })
 	opts = vim.deepcopy(opts)
 
 	if opts.override then
@@ -110,7 +118,11 @@ function M.update_win(terminal, opts)
 
 	local position = terminal.opts.position
 	local target = opts.win.position or position
-	terminal.opts = Win.resolve(terminal.opts, target == "float" and "float" or "split", vim.deepcopy(opts.win))
+	local win_opts = vim.deepcopy(opts.win)
+	if (target == "left" or target == "right") and win_opts.width == nil then
+		win_opts.width = 0.3
+	end
+	terminal.opts = Win.resolve(terminal.opts, target == "float" and "float" or "split", win_opts)
 	local changed = position ~= terminal.opts.position
 	if changed then
 		local vertical = terminal.opts.position == "left" or terminal.opts.position == "right"

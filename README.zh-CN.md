@@ -72,7 +72,7 @@ require("terminal").setup({
 
 | 选项 | 说明 |
 | --- | --- |
-| `win` | `win.nvim` 窗口配置，默认使用 `terminal` 样式，`width = 0.3`（编辑器宽度的 30%，也适用于浮窗）。 |
+| `win` | `win.nvim` 窗口配置。左、右分屏默认使用 `width = 0.3`（编辑器宽度的 30%）；浮窗和上、下分屏使用 `win.nvim` 默认值。 |
 | `shell` | 未指定命令时使用的 shell，默认为 `vim.o.shell`。 |
 | `cwd` | 进程工作目录。 |
 | `env` | 传给进程的环境变量。 |

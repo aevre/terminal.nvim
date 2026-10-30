@@ -5,7 +5,6 @@ local M = {}
 local defaults = {
 	win = {
 		style = "terminal",
-		width = 0.3,
 		wo = {
 			winhighlight = "Normal:NormalFloat,NormalNC:NormalFloat,FloatBorder:FloatBorder,FloatTitle:FloatTitle",
 		},
