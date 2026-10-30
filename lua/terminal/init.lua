@@ -290,11 +290,11 @@ end
 ---@return terminal
 function M.toggle(cmd, opts)
 	local terminal, created = M.get(cmd, opts)
+	terminal = assert(terminal)
 	if created then
 		return terminal
 	end
 
-	terminal = assert(terminal)
 	if update_win(terminal, opts) and terminal:valid() then
 		terminal:hide()
 	end
