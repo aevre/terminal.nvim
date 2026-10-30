@@ -115,4 +115,4 @@ terminal.colorize()
 
 ## 开发
 
-在仓库根目录运行 `make check`。带 guard 的 `plugin/terminal.lua` 入口只应用默认配置，终端行为保留在 `lua/terminal/`。插件管理器随后以用户选项再次调用 `setup()` 时必须保持安全。
+在仓库根目录运行 `make check` 和 `make test`。带 guard 的 `plugin/terminal.lua` 入口只应用默认配置，终端行为保留在 `lua/terminal/` 下职责明确的模块中。插件管理器随后以用户选项再次调用 `setup()` 时必须保持安全。

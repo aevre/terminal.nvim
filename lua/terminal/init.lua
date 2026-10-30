@@ -1,9 +1,13 @@
 local Win = require("win")
+local config = require("terminal.config")
+local registry = require("terminal.registry")
+local style = require("terminal.style")
+local Terminal = require("terminal.terminal")
+local util = require("terminal.util")
 
----@class terminal: win
----@field cmd? string | string[]
----@field opts terminal.Opts
+---@class terminal.Module
 ---@overload fun(cmd?: string|string[], opts?: terminal.Opts): terminal
+---@type terminal.Module
 local M = setmetatable({}, {
 	__call = function(t, ...)
 		return t.toggle(...)
@@ -14,234 +18,62 @@ M.meta = {
 	desc = "Create and toggle floating/split terminals",
 }
 
-local config = {}
+style.setup(Win)
 
+---@param opts? terminal.Config
+---@return terminal.Module
 function M.setup(opts)
-	config = vim.tbl_deep_extend("force", config, opts or {})
+	config.setup(opts)
 	return M
 end
 
----@class terminal.Config
----@field win? win.Config|{}
----@field shell? string|string[] The shell to use. Defaults to `vim.o.shell`
----@field override? fun(cmd?: string|string[], opts?: terminal.Opts) Use this to use a different terminal implementation
----@type terminal.Opts
-local defaults = {
-	win = {
-		style = "terminal",
-		width = 0.3,
-		wo = {
-			winhighlight = "Normal:NormalFloat,NormalNC:NormalFloat,FloatBorder:FloatBorder,FloatTitle:FloatTitle",
-		},
-	},
-}
-
----@class terminal.Opts: terminal.Config
----@field cwd? string
----@field count? integer
----@field env? table<string, string>
----@field start_insert? boolean start insert mode when starting the terminal
----@field auto_insert? boolean start insert mode when entering the terminal buffer
----@field auto_close? boolean close the terminal buffer when the process exits
----@field interactive? boolean shortcut for `start_insert`, `auto_close` and `auto_insert` (default: true)
-
-Win.style.add("terminal", {
-	bo = {
-		filetype = "core_terminal",
-	},
-	wo = {
-		winbar = "",
-	},
-	stack = true, -- when enabled, multiple split windows with the same position will be stacked together (useful for terminals)
-	keys = {
-		q = "hide",
-		gf = function(self)
-			local cfile = vim.fn.expand("<cfile>")
-			if type(cfile) == "table" then
-				cfile = cfile[1] or ""
-			end
-
-			local f = vim.fn.findfile(cfile, "**")
-			if f == "" then
-				vim.notify("No file under cursor", vim.log.levels.WARN)
-			else
-				self:hide()
-				vim.schedule(function()
-					vim.cmd.edit(f)
-				end)
-			end
-		end,
-		term_normal = {
-			"<esc>",
-			function(self)
-				self.meta.esc_timer = self.meta.esc_timer or vim.uv.new_timer()
-				if self.meta.esc_timer:is_active() then
-					self.meta.esc_timer:stop()
-					vim.cmd("stopinsert")
-				else
-					self.meta.esc_timer:start(200, 0, function() end)
-					return "<esc>"
-				end
-			end,
-			mode = "t",
-			expr = true,
-			desc = "Double escape to normal mode",
-		},
-	},
-})
-
----@type table<string, terminal>
-local terminals = setmetatable({}, {
-	__mode = "v",
-})
-
-local function jobstart(cmd, opts)
-	opts = opts or {}
-	return vim.fn.jobstart(cmd, vim.tbl_isempty(opts) and vim.empty_dict() or opts)
-end
-
 --- Open a new terminal window.
----@param cmd? string | string[]
+---@param cmd? string|string[]
 ---@param opts? terminal.Opts
+---@return terminal?
 function M.open(cmd, opts)
-	opts = opts or {}
-	opts = vim.tbl_deep_extend("force", vim.deepcopy(defaults), vim.deepcopy(config), opts or {})
-	local id = opts.count or vim.v.count1
-	opts.win = Win.resolve("terminal", {
-		position = cmd and "float" or "bottom",
-	}, opts.win, { show = false })
-	opts = vim.deepcopy(opts)
-
-	if opts.override then
-		return opts.override(cmd, opts)
-	end
-
-	local interactive = opts.interactive ~= false
-	local auto_insert = opts.auto_insert or (opts.auto_insert == nil and interactive)
-	local start_insert = opts.start_insert or (opts.start_insert == nil and interactive)
-	local auto_close = opts.auto_close or (opts.auto_close == nil and interactive)
-
-	local on_buf = opts.win and opts.win.on_buf
-	---@param self terminal
-	opts.win.on_buf = function(self)
-		self.cmd = cmd
-		vim.b[self.buf].core_terminal = { cmd = cmd, id = id, cwd = opts.cwd, env = opts.env }
-		if on_buf then
-			on_buf(self)
-		end
-	end
-
-	local on_win = opts.win and opts.win.on_win
-	---@param self terminal
-	opts.win.on_win = function(self)
-		if start_insert and vim.api.nvim_get_current_buf() == self.buf then
-			vim.cmd.startinsert()
-		end
-		if on_win then
-			on_win(self)
-		end
-	end
-
-	local terminal = Win(opts.win) --[[@as terminal]]
-	local tid = M.tid(cmd, opts)
-	terminals[tid] = terminal
-
-	if auto_insert then
-		terminal:on("BufEnter", function()
-			vim.cmd.startinsert()
-		end, { buf = true })
-	end
-
-	if auto_close then
-		terminal:on("TermClose", function()
-			if type(vim.v.event) == "table" and vim.v.event.status ~= 0 then
-				vim.notify(
-					"Terminal exited with code " .. vim.v.event.status .. ".\nCheck for any errors.",
-					vim.log.levels.ERROR
-				)
-				return
-			end
-			terminal:close()
-			vim.cmd.checktime()
-		end, { buf = true })
-	end
-
-	terminal:on("ExitPre", function()
-		terminal:close()
-	end)
-
-	terminal:on("BufWipeout", function()
-		terminals[tid] = nil
-		vim.schedule(function()
-			terminal:close()
-		end)
-	end, { buf = true })
-
-	terminal:show()
-	vim.api.nvim_buf_call(terminal.buf, function()
-		jobstart(cmd or M.parse(opts.shell or vim.o.shell), {
-			cwd = opts.cwd,
-			env = opts.env,
-			term = true,
-		})
-	end)
-
-	vim.cmd("noh")
-	return terminal
+	return Terminal.open(cmd, config.get(opts))
 end
 
---- Get a terminal id based on the `cmd`, `cwd`, `env` and `vim.v.count1` options.
----@param cmd? string | string[]
+--- Get a terminal id based on command, cwd, environment, and count.
+---@param cmd? string|string[]
 ---@param opts? terminal.Opts
+---@return string
 function M.tid(cmd, opts)
-	opts = opts or {}
-	return vim.inspect({
-		cmd = type(cmd) == "table" and cmd or { cmd },
-		cwd = opts.cwd or vim.fn.getcwd(0),
-		env = opts.env,
-		count = opts.count or vim.v.count1,
-	})
+	return registry.id(cmd, config.get(opts))
 end
 
 --- Get or create a terminal window.
---- The terminal id is based on the `cmd`, `cwd`, `env` and `vim.v.count1` options.
---- `opts.create` defaults to `true`.
----@param cmd? string | string[]
----@param opts? terminal.Opts| {create?: boolean}
+---@param cmd? string|string[]
+---@param opts? terminal.Opts
 ---@return terminal? terminal, boolean? created
 function M.get(cmd, opts)
-	opts = opts or {}
-	local id = M.tid(cmd, opts)
+	local resolved = config.get(opts)
+	local id = M.tid(cmd, resolved)
+	local terminal = registry.get(id)
 	local created = false
-	if not (terminals[id] and terminals[id]:buf_valid()) and (opts.create ~= false) then
-		local ret = M.open(cmd, opts)
+	if not (terminal and terminal:buf_valid()) and resolved.create ~= false then
+		local ret = Terminal.open(cmd, resolved)
 		if ret then
 			ret:on("BufWipeout", function()
-				terminals[id] = nil
+				registry.set(id, nil)
 			end, { buf = true })
 		end
-		assert(terminals[id], "Terminal was not created")
+		terminal = registry.get(id)
+		assert(terminal, "Terminal was not created")
 		created = true
 	end
-	return terminals[id], created
+	return terminal, created
 end
 
 ---@return terminal[]
 function M.list()
-	local ret = {}
-	for _, terminal in pairs(terminals) do
-		if terminal:buf_valid() then
-			ret[#ret + 1] = terminal
-		end
-	end
-	table.sort(ret, function(a, b)
-		return a.buf < b.buf
-	end)
-	return ret
+	return registry.list()
 end
 
 --- Select and focus an open terminal.
 function M.select()
+	---@type terminal.SelectItem[]
 	local items = {}
 	for i, terminal in ipairs(M.list()) do
 		local title = vim.b[terminal.buf].term_title
@@ -266,26 +98,8 @@ function M.select()
 	end)
 end
 
-local function update_win(terminal, opts)
-	if not opts or not opts.win then
-		return false
-	end
-
-	local position = terminal.opts.position
-	local target = opts.win.position or position
-	terminal.opts = Win.resolve(terminal.opts, target == "float" and "float" or "split", vim.deepcopy(opts.win))
-	local changed = position ~= terminal.opts.position
-	if changed then
-		local vertical = terminal.opts.position == "left" or terminal.opts.position == "right"
-		terminal.opts.wo.winfixheight = not vertical
-		terminal.opts.wo.winfixwidth = vertical
-	end
-	return changed
-end
-
 --- Toggle a terminal window.
---- The terminal id is based on the `cmd`, `cwd`, `env` and `vim.v.count1` options.
----@param cmd? string | string[]
+---@param cmd? string|string[]
 ---@param opts? terminal.Opts
 ---@return terminal
 function M.toggle(cmd, opts)
@@ -295,112 +109,34 @@ function M.toggle(cmd, opts)
 		return terminal
 	end
 
-	if update_win(terminal, opts) and terminal:valid() then
+	if Terminal.update_win(terminal, opts) and terminal:valid() then
 		terminal:hide()
 	end
-	return terminal:toggle()
+	terminal:toggle()
+	return terminal
 end
 
 --- Focus a terminal window. If already focused, hide it.
---- The terminal id is based on the `cmd`, `cwd`, `env` and `vim.v.count1` options.
----@param cmd? string | string[]
+---@param cmd? string|string[]
 ---@param opts? terminal.Opts
----@return terminal?, boolean?
+---@return terminal, boolean?
 function M.focus(cmd, opts)
 	local terminal, created = M.get(cmd, opts)
-	local changed = terminal and not created and update_win(terminal, opts)
+	local changed = terminal and not created and Terminal.update_win(terminal, opts)
 	if terminal and changed and terminal:valid() then
 		terminal:hide()
 	elseif terminal and not created and vim.api.nvim_get_current_buf() == terminal.buf then
 		terminal:hide()
 		return terminal, created
 	end
-	return created and terminal or assert(terminal):show():focus()
+	terminal = assert(terminal)
+	if not created then
+		terminal:show():focus()
+	end
+	return terminal, created
 end
 
---- Parses a shell command into a table of arguments.
---- - spaces inside quotes (only double quotes are supported) are preserved
---- - backslash
----@private
----@param cmd string|string[]
----@return string[]
-function M.parse(cmd)
-	if type(cmd) == "table" then
-		return cmd
-	end
-	local args = {}
-	local in_quotes, escape_next, current = false, false, ""
-	local function add()
-		if #current > 0 then
-			table.insert(args, current)
-			current = ""
-		end
-	end
-
-	for i = 1, #cmd do
-		local char = cmd:sub(i, i)
-		if escape_next then
-			current = current .. ((char == '"' or char == "\\") and "" or "\\") .. char
-			escape_next = false
-		elseif char == "\\" and in_quotes then
-			escape_next = true
-		elseif char == '"' then
-			in_quotes = not in_quotes
-		elseif char:find("[ \t]") and not in_quotes then
-			add()
-		else
-			current = current .. char
-		end
-	end
-	add()
-	return args
-end
-
---- Colorize the current buffer.
---- Replaces ansii color codes with the actual colors.
----
---- Example:
----
---- ```sh
---- ls -la --color=always | nvim - -c "lua Snacks.terminal.colorize()"
---- ```
-function M.colorize()
-	vim.wo.number = false
-	vim.wo.relativenumber = false
-	vim.wo.statuscolumn = ""
-	vim.wo.signcolumn = "no"
-	vim.opt.listchars = { space = " " }
-
-	local buf = vim.api.nvim_get_current_buf()
-
-	local lines = vim.api.nvim_buf_get_lines(buf, 0, -1, false)
-	while #lines > 0 and vim.trim(lines[#lines]) == "" do
-		lines[#lines] = nil
-	end
-	vim.api.nvim_buf_set_lines(buf, 0, -1, false, {})
-
-	vim.api.nvim_chan_send(vim.api.nvim_open_term(buf, {}), table.concat(lines, "\r\n"))
-	vim.keymap.set("n", "q", "<cmd>q<cr>", { silent = true, buffer = buf })
-	vim.api.nvim_create_autocmd("TextChanged", {
-		buffer = buf,
-		callback = function()
-			pcall(vim.api.nvim_win_set_cursor, 0, { #lines, 0 })
-		end,
-	})
-	vim.api.nvim_create_autocmd("TermEnter", { buffer = buf, command = "stopinsert" })
-end
-
--- -- @private
--- function M.health()
--- 	local opts = Builtin.config.get("terminal", defaults --[[@as terminal.Opts]])
--- 	local cmd = M.parse(opts.shell or vim.o.shell)
--- 	local ok = cmd[1] and (vim.fn.executable(cmd[1]) == 1)
--- 	local msg = ("shell %s\n- `vim.o.shell`: %s\n- `parsed`: %s"):format(
--- 		ok and "configured" or "not found",
--- 		vim.o.shell,
--- 		vim.inspect(cmd)
--- 	)
--- 	Builtin.health[ok and "ok" or "error"](msg)
--- end
+M.parse = util.parse
+M.colorize = util.colorize
 
 return M
