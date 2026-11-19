@@ -120,4 +120,6 @@ Each terminal object is a `win.nvim` window object with terminal-specific `cmd` 
 
 ## Development
 
+Run `:checkhealth terminal` in Neovim to inspect runtime requirements. `make health` exercises the same provider headlessly.
+
 Run `make check` and `make test` from the repository root. The guarded `plugin/terminal.lua` entrypoint only applies defaults; terminal behavior stays in focused modules under `lua/terminal/`. Keep `setup()` safe when a plugin manager calls it again with user options.

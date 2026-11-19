@@ -115,4 +115,6 @@ terminal.colorize()
 
 ## 开发
 
+在 Neovim 中运行 `:checkhealth terminal` 检查运行环境；`make health` 会以 headless 模式验证同一个 provider。
+
 在仓库根目录运行 `make check` 和 `make test`。带 guard 的 `plugin/terminal.lua` 入口只应用默认配置，终端行为保留在 `lua/terminal/` 下职责明确的模块中。插件管理器随后以用户选项再次调用 `setup()` 时必须保持安全。
