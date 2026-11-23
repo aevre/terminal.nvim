@@ -44,7 +44,13 @@ function M.open(cmd, opts)
 	---@param self terminal
 	opts.win.on_buf = function(self)
 		self.cmd = cmd
-		vim.b[self.buf].core_terminal = { cmd = cmd, id = id, cwd = opts.cwd, env = opts.env }
+		vim.b[self.buf].core_terminal = {
+			cmd = cmd,
+			id = id,
+			cwd = opts.cwd,
+			env = opts.env,
+		}
+
 		if on_buf then
 			on_buf(self)
 		end
@@ -55,6 +61,7 @@ function M.open(cmd, opts)
 		if start_insert and vim.api.nvim_get_current_buf() == self.buf then
 			vim.cmd.startinsert()
 		end
+
 		if on_win then
 			on_win(self)
 		end

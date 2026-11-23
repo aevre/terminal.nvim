@@ -24,7 +24,12 @@ end
 ---@param opts? terminal.Opts
 ---@return terminal.Opts
 function M.get(opts)
-	local ret = vim.tbl_deep_extend("force", vim.deepcopy(defaults), vim.deepcopy(config), vim.deepcopy(opts or {}))
+	local ret = vim.tbl_deep_extend(
+		"force",
+		vim.deepcopy(defaults),
+		vim.deepcopy(config),
+		vim.deepcopy(opts or {})
+	)
 	---@cast ret terminal.Opts
 	return ret
 end

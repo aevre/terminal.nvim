@@ -62,7 +62,10 @@ local ok, err = pcall(function()
 	terminal:close()
 
 	Terminal.setup({ count = 11, cwd = vim.fn.getcwd(), win = { wo = { winbar = "Setup title" } } })
-	terminal = assert(Terminal.get(nil, { interactive = false }), "setup reuse options should create a terminal")
+	terminal = assert(
+		Terminal.get(nil, { interactive = false }),
+		"setup reuse options should create a terminal"
+	)
 	check(terminal, "Setup title")
 	terminal:close()
 	terminal = open({ count = 12, interactive = false, win = { wo = { winbar = "Custom title" } } })
